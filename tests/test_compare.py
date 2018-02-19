@@ -1,31 +1,22 @@
-import os
-
-import py
 import pytest
 from PIL import Image
 
 from pytest_visual_diff.compare import compare_images, compute_squared_error
 
-images_dir = py.path.local(__file__).join("..", "images")
 
-
-def open_image(name):
-    return Image.open(os.path.join(images_dir / name))
+@pytest.fixture
+def red_image(open_image):
+    return open_image("red")
 
 
 @pytest.fixture
-def red_image():
-    return open_image("red.png")
+def blue_image(open_image):
+    return open_image("blue")
 
 
 @pytest.fixture
-def blue_image():
-    return open_image("blue.png")
-
-
-@pytest.fixture
-def green_blue_image():
-    return open_image("green-blue.png")
+def green_blue_image(open_image):
+    return open_image("green-blue")
 
 
 def test_pixel_changes():
@@ -60,7 +51,8 @@ def test_different_images_fuzz(red_image, blue_image):
     assert compare_images(red_image, blue_image, 0.6)
 
 
-def test_check_screenshot(colored_divs_server, testdir, selenium_args):
+def test_check_screenshot(colored_divs_server, testdir,
+                          copy_image, selenium_args):
     testdir.makepyfile(test_module="""
     def test_one_element(driver, check_reference_screenshot):
         driver.get("{server_url}")
@@ -74,19 +66,15 @@ def test_check_screenshot(colored_divs_server, testdir, selenium_args):
         check_reference_screenshot((green, blue))
     """.format(server_url=colored_divs_server.url))
 
-    screenshot_dir = testdir.tmpdir.join("screenshots", "test_module")
-    screenshot_dir.ensure(dir=True)
-
-    for (test, source) in (("test_one_element", "red"),
-                           ("test_multiple_elements", "green-blue")):
-        source = images_dir.join(source + ".png")
-        source.copy(screenshot_dir.join(test + ".png"))
+    copy_image("red", "test_module", "test_one_element")
+    copy_image("green-blue", "test_module", "test_multiple_elements")
 
     result = testdir.runpytest(*selenium_args)
-    assert result.ret == 0
+    result.assert_outcomes(passed=2)
 
 
-def test_check_screenshot_changed(colored_divs_server, testdir, selenium_args):
+def test_check_screenshot_changed(colored_divs_server, testdir,
+                                  copy_image, selenium_args):
     testdir.makepyfile(test_module="""
     def test_one_element(driver, check_reference_screenshot):
         driver.get("{server_url}")
@@ -94,11 +82,7 @@ def test_check_screenshot_changed(colored_divs_server, testdir, selenium_args):
         check_reference_screenshot(element)
     """.format(server_url=colored_divs_server.url))
 
-    screenshot_dir = testdir.tmpdir.join("screenshots", "test_module")
-    screenshot_dir.ensure(dir=True)
-
-    source = images_dir.join("blue.png")
-    source.copy(screenshot_dir.join("test_one_element.png"))
+    copy_image("blue", "test_module", "test_one_element")
 
     result = testdir.runpytest(*selenium_args)
     result.assert_outcomes(failed=1)

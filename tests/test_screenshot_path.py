@@ -16,7 +16,7 @@ def test_screenshot_path_default_format(testdir):
         assert get_screenshot_path("suffix") == expected_path
     """.format(directory=testdir.tmpdir))
     result = testdir.runpytest()
-    assert result.ret == 0
+    result.assert_outcomes(passed=1)
 
 
 def test_screenshot_path_ini_format(testdir):
@@ -34,4 +34,4 @@ def test_screenshot_path_ini_format(testdir):
         assert get_screenshot_path("suffix") == expected_path
     """.format(directory=testdir.tmpdir))
     result = testdir.runpytest()
-    assert result.ret == 0
+    result.assert_outcomes(passed=1)

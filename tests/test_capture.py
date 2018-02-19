@@ -62,7 +62,7 @@ def test_save_screenshot(colored_divs_server, testdir, selenium_args):
     """.format(server_url=colored_divs_server.url))
 
     result = testdir.runpytest(*selenium_args)
-    assert result.ret == 0
+    result.assert_outcomes(passed=2)
 
     for test in ("test_one_element", "test_multiple_elements"):
         filename = testdir.tmpdir.join("screenshots", "test_module",

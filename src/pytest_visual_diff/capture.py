@@ -1,5 +1,6 @@
 import io
 import os
+from base64 import b64encode
 from operator import itemgetter
 
 import pytest
@@ -102,6 +103,12 @@ def save_image(image, filename):
     if not os.path.exists(directory):
         os.makedirs(directory)
     image.save(filename)
+
+
+def image_to_base64(image):
+    with io.BytesIO() as buffer:
+        image.save(buffer, "PNG")
+        return b64encode(buffer.getvalue())
 
 
 @pytest.fixture()

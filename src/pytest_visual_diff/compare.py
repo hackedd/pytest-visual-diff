@@ -39,11 +39,10 @@ def check_reference_screenshot(request, driver, get_screenshot_path):
         "--update-reference-screenshots"
     )
 
+    screenshots = request.node._pytest_visual_diff = []
+
     def _check_reference_screenshot(element, name=None, fuzz=0.0):
         actual = get_screenshot(driver, element)
-
-        # TODO: Record each screenshot for pytest_runtest_makereport
-        # Where? Store as attributes on the test?
 
         filename = get_screenshot_path(name)
         if update_reference:
@@ -55,6 +54,14 @@ def check_reference_screenshot(request, driver, get_screenshot_path):
                         "%s does not exist" % filename)
 
         expected = Image.open(filename)
+
+        # Record screenshots for use in HTML report
+        screenshots.append({
+            "name": name,
+            "expected": expected,
+            "actual": actual,
+        })
+
         if not compare_images(expected, actual, fuzz):
             pytest.fail("Element is different from reference image")
 
