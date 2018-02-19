@@ -13,6 +13,7 @@ python:
 install:
   - ./scripts/download-chromedriver.sh
   - ./scripts/download-geckodriver.sh
+  - export PATH=$PATH:$PWD
   - pip install pytest pytest-localserver
   - pip install .
 script: ./scripts/run-tests.sh
