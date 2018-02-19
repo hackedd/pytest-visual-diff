@@ -104,3 +104,25 @@ def test_check_screenshot_missing(colored_divs_server, testdir, selenium_args):
     result.stdout.fnmatch_lines([
         "*Failed: Unable to check reference image*"
     ])
+
+
+def test_update_screenshots(colored_divs_server, testdir,
+                            copy_image, selenium_args):
+    testdir.makepyfile(test_module="""
+    def test_one_element(driver, check_reference_screenshot):
+        driver.get("{server_url}")
+        element = driver.find_element_by_id("red")
+        check_reference_screenshot(element)
+    """.format(server_url=colored_divs_server.url))
+
+    result = testdir.runpytest("--update-reference-screenshots",
+                               *selenium_args)
+    result.assert_outcomes(skipped=1)
+
+    screenshot = testdir.tmpdir.join("screenshots", "test_module",
+                                     "test_one_element.png")
+    assert screenshot.check(file=True)
+
+    # Run the same tests a second time, to make sure they pass now.
+    result = testdir.runpytest(*selenium_args)
+    result.assert_outcomes(passed=1)
