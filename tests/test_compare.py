@@ -89,3 +89,18 @@ def test_check_screenshot_changed(colored_divs_server, testdir,
     result.stdout.fnmatch_lines([
         "*Failed: Element is different from reference image*"
     ])
+
+
+def test_check_screenshot_missing(colored_divs_server, testdir, selenium_args):
+    testdir.makepyfile(test_module="""
+    def test_one_element(driver, check_reference_screenshot):
+        driver.get("{server_url}")
+        element = driver.find_element_by_id("red")
+        check_reference_screenshot(element)
+    """.format(server_url=colored_divs_server.url))
+
+    result = testdir.runpytest(*selenium_args)
+    result.assert_outcomes(failed=1)
+    result.stdout.fnmatch_lines([
+        "*Failed: Unable to check reference image*"
+    ])
