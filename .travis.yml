@@ -1,0 +1,17 @@
+addons:
+  chrome: stable
+  firefox: stable
+language: python
+python:
+  - "2.7"
+  - "3.6"
+  - "pypy"
+  - "pypy3"
+install:
+  - pip install pytest pytest-localserver
+  - pip install .
+script: ./run-tests.sh
+env:
+  - BROWSER=Chrome HEADLESS=true
+  - BROWSER=Firefox HEADLESS=true
+  - BROWSER=PhantomJS
