@@ -1,5 +1,7 @@
 import re
 
+from helpers import expected_failure_with_chrome
+
 link_re = '<a class="image" href=".*?" target="_blank">(.*?)</a>'
 image_re = '<div class="image"><a href=".*"><img src=".*"/></a></div>'
 
@@ -27,6 +29,7 @@ def test_images_are_added_to_report(colored_divs_server, testdir,
     assert len(re.findall(image_re, report_html)) == len(matches)
 
 
+@expected_failure_with_chrome
 def test_multiple_images_are_added_to_report(colored_divs_server, testdir,
                                              copy_image, selenium_args):
     testdir.makepyfile(test_module="""

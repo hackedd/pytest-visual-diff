@@ -114,7 +114,7 @@ def copy_image(testdir):
 
 @pytest.fixture
 def selenium_args(request):
-    args = ("--driver", request.config.getoption('driver'))
+    args = ("--driver", request.config.getoption("driver"))
     if request.config.getoption("--headless"):
         args += ("--headless", )
     return args

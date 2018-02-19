@@ -3,6 +3,8 @@ from PIL import Image
 
 from pytest_visual_diff.compare import compare_images, compute_squared_error
 
+from helpers import expected_failure_with_chrome
+
 
 @pytest.fixture
 def red_image(open_image):
@@ -51,6 +53,7 @@ def test_different_images_fuzz(red_image, blue_image):
     assert compare_images(red_image, blue_image, 0.6)
 
 
+@expected_failure_with_chrome
 def test_check_screenshot(colored_divs_server, testdir,
                           copy_image, selenium_args):
     testdir.makepyfile(test_module="""

@@ -1,12 +1,15 @@
 from pytest_visual_diff.capture import (get_element_screenshot,
                                         get_multiple_element_screenshot)
 
+from helpers import expected_failure_with_chrome
+
 RED = (255, 0, 0, 255)
 GREEN = (0, 128, 0, 255)
 BLUE = (0, 0, 255, 255)
 TRANSPARENT = (0, 0, 0, 0)
 
 
+@expected_failure_with_chrome
 def test_get_element_screenshot(colored_divs_server, driver):
     driver.get(colored_divs_server.url)
 
@@ -24,6 +27,7 @@ def test_get_element_screenshot(colored_divs_server, driver):
     assert image.getpixel((99, 99)) == RED
 
 
+@expected_failure_with_chrome
 def test_get_multiple_elements_screenshot(colored_divs_server, driver):
     driver.get(colored_divs_server.url)
 
