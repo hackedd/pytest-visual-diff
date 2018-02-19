@@ -1,3 +1,5 @@
+import os
+
 from pytest_visual_diff.capture import get_screenshot_path  # noqa: F401
 from pytest_visual_diff.capture import save_screenshot  # noqa: F401
 from pytest_visual_diff.capture import image_to_base64
@@ -5,11 +7,15 @@ from pytest_visual_diff.compare import check_reference_screenshot  # noqa: F401
 
 
 def pytest_addoption(parser):
-    parser.addini("screenshot_path_format", help="",
-                  default="{directory}/screenshots/{module}/{name}.png")
+    default_screenshot_path_format = os.path.join(
+        "{directory}", "screenshots", "{module}", "{name}.png"
+    )
+    parser.addini("screenshot_path_format",
+                  help="controls where the reference screenshots are stored.",
+                  default=default_screenshot_path_format)
 
     parser.addoption("--update-reference-screenshots", action="store_true",
-                     help="update (or create) reference screenshots")
+                     help="update (or create) reference screenshots.")
 
 
 def pytest_selenium_capture_debug(item,  extra):

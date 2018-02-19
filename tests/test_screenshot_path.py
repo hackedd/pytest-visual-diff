@@ -2,7 +2,7 @@ def test_screenshot_path_default_format(testdir):
     testdir.makepyfile(test_module="""
     import os
 
-    directory = "{directory}"
+    directory = r"{directory}"
 
     def test_function(get_screenshot_path):
         expected_path = os.path.join(directory, "screenshots",
