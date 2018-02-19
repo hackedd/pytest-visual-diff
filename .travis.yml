@@ -1,6 +1,9 @@
 addons:
   chrome: stable
   firefox: latest
+  apt:
+    packages:
+      - jq
 language: python
 python:
   - "2.7"
@@ -8,9 +11,11 @@ python:
   - "pypy"
   - "pypy3"
 install:
+  - ./scripts/download-chromedriver.sh
+  - ./scripts/download-geckodriver.sh
   - pip install pytest pytest-localserver
   - pip install .
-script: ./run-tests.sh
+script: ./scripts/run-tests.sh
 env:
   - BROWSER=Chrome HEADLESS=true
   - BROWSER=Firefox HEADLESS=true
