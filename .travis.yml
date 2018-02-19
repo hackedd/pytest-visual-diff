@@ -1,6 +1,6 @@
 addons:
   chrome: stable
-  firefox: stable
+  firefox: latest
 language: python
 python:
   - "2.7"
