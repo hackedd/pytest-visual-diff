@@ -1,7 +1,8 @@
 import pytest
 from PIL import Image
 
-from pytest_visual_diff.compare import compare_images, compute_squared_error
+from pytest_visual_diff.compare import (compare_images, compute_squared_error,
+                                        highlight_changes)
 
 from helpers import expected_failure_with_chrome
 
@@ -51,6 +52,43 @@ def test_different_images_fuzz(red_image, blue_image):
     # setting the fuzz factor above that should accept them as equal.
     assert not compare_images(red_image, blue_image, 0.3)
     assert compare_images(red_image, blue_image, 0.6)
+
+
+def test_highlight_no_changes():
+    a = Image.new("RGBA", (2, 2), (0, 0, 0, 255))
+    b = Image.new("RGBA", (2, 2), (0, 0, 0, 255))
+
+    # No changes, no areas to highlight.
+    assert highlight_changes(a, b) == a
+
+
+def test_highlight_changes():
+    a = Image.new("RGBA", (2, 2), (0, 0, 0, 255))
+    b = Image.new("RGBA", (2, 2), (0, 0, 0, 255))
+
+    # Change one pixel, completely.
+    b.putpixel((0, 0), (255, 255, 255, 255))
+
+    # The changed pixel should be made entirely red by the highlight function.
+    expected = a.copy()
+    expected.putpixel((0, 0), (255, 0, 0, 255))
+
+    assert highlight_changes(a, b) == expected
+
+
+def test_highlight_change_one_band():
+    a = Image.new("RGBA", (2, 2), (0, 0, 0, 255))
+    b = Image.new("RGBA", (2, 2), (0, 0, 0, 255))
+
+    # Change the blue channel of one pixel, a little.
+    b.putpixel((0, 0), (0, 0, 1, 255))
+
+    # The changed pixel should be made the same intensity of red by the
+    # highlight function.
+    expected = a.copy()
+    expected.putpixel((0, 0), (1, 0, 0, 255))
+
+    assert highlight_changes(a, b) == expected
 
 
 @expected_failure_with_chrome

@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from PIL import Image
+from PIL import Image, ImageMath
 
 from pytest_visual_diff.capture import get_screenshot, save_image
 
@@ -31,6 +31,26 @@ def compare_images(expected, actual, fuzz=0.0):
     return error <= maximum_acceptable_error
 
 
+def highlight_changes(image_a, image_b, highlight_color=(255, 0, 0)):
+    """Highlight pixels that have been changed between image A and B. Returns
+    a new image object.
+    """
+    assert image_a.size == image_b.size
+    assert image_a.mode == image_b.mode
+
+    bands_a = image_a.convert("RGB").split()
+    bands_b = image_b.convert("RGB").split()
+    bitwise_diff = Image.new("L", image_a.size)
+    for a, b in zip(bands_a, bands_b):
+        bitwise_diff = ImageMath.eval("convert(d | (a ^ b), 'L')",
+                                      d=bitwise_diff, a=a, b=b)
+
+    highlight = Image.new("RGB", image_a.size, highlight_color)
+    highlight.putalpha(bitwise_diff)
+
+    return Image.alpha_composite(image_a, highlight)
+
+
 @pytest.fixture
 def check_reference_screenshot(request, driver, get_screenshot_path):
     """Compare an element on the page to a previously created screenshot."""
@@ -56,13 +76,15 @@ def check_reference_screenshot(request, driver, get_screenshot_path):
         expected = Image.open(filename)
 
         # Record screenshots for use in HTML report
-        screenshots.append({
+        screenshot = {
             "name": name,
             "expected": expected,
             "actual": actual,
-        })
+        }
+        screenshots.append(screenshot)
 
         if not compare_images(expected, actual, fuzz):
+            screenshot["diff"] = highlight_changes(expected, actual)
             pytest.fail("Element is different from reference image")
 
     return _check_reference_screenshot

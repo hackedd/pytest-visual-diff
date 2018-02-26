@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import inspect
 
 import py
@@ -118,3 +120,24 @@ def selenium_args(request):
     if request.config.getoption("--headless"):
         args += ("--headless", )
     return args
+
+
+def pytest_assertrepr_compare(op, left, right):
+    if isinstance(left, Image.Image) and isinstance(right, Image.Image):
+        # If the images are not the same size, fall back to the default repr.
+        if left.size != right.size:
+            return None
+
+        # Add the pixel values to help debugging.
+        info = ["Comparing %r and %r" % (left, right)]
+        for y in range(left.height):
+            left_line = ["%d:" % y]
+            right_line = ["  "]
+            for x in range(left.width):
+                left_line.append(repr(left.getpixel((x, y))))
+                right_line.append(repr(right.getpixel((x, y))))
+            info.append(" ".join(left_line))
+            info.append(" ".join(right_line))
+        return info
+
+    return None

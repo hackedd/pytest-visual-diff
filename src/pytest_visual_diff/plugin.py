@@ -34,5 +34,9 @@ def pytest_selenium_capture_debug(item,  extra):
         data = image_to_base64(images["expected"]).decode("ascii")
         extra.append(pytest_html.extras.image(data, "Expected" + suffix))
 
+        if "diff" in images:
+            data = image_to_base64(images["diff"]).decode("ascii")
+            extra.append(pytest_html.extras.image(data, "Difference" + suffix))
+
         data = image_to_base64(images["actual"]).decode("ascii")
         extra.append(pytest_html.extras.image(data, "Actual" + suffix))

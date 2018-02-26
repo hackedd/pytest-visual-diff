@@ -25,7 +25,7 @@ def test_images_are_added_to_report(colored_divs_server, testdir,
     report_html = report_path.read()
 
     matches = re.findall(link_re, report_html)
-    assert matches == ["Screenshot", "Expected", "Actual"]
+    assert matches == ["Screenshot", "Expected", "Difference", "Actual"]
     assert len(re.findall(image_re, report_html)) == len(matches)
 
 
@@ -50,7 +50,9 @@ def test_multiple_images_are_added_to_report(colored_divs_server, testdir,
     assert report_path.check(file=True)
     report_html = report_path.read()
 
+    # Check that both comparisons added screenshots to the report and that
+    # the second comparison added a 'difference' image.
     matches = re.findall(link_re, report_html)
     assert matches == ["Screenshot", "Expected foo", "Actual foo",
-                       "Expected bar", "Actual bar"]
+                       "Expected bar", "Difference bar", "Actual bar"]
     assert len(re.findall(image_re, report_html)) == len(matches)
