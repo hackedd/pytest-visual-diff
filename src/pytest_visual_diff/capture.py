@@ -38,6 +38,20 @@ def image_from_png(png_data):
     return image
 
 
+def get_driver_screenshot(driver):
+    image = image_from_png(driver.get_screenshot_as_png())
+
+    # Screenshots captured by Chrome on a Retina display are always twice the
+    # size of the reported window size.
+    window_size = driver.get_window_size()
+    scale = image.width / window_size["width"]
+    if scale > 1:
+        target_size = int(image.width / scale), int(image.height / scale)
+        image = image.resize(target_size, Image.BICUBIC)
+
+    return image
+
+
 def get_element_screenshot(driver, element):
     """Create a screenshot of an element by taking a screenshot of the full
     screen and cropping it to the selected element. Returns an Image object.
@@ -47,7 +61,8 @@ def get_element_screenshot(driver, element):
     PhantomJS returns the full screen.
 
     """
-    image = image_from_png(driver.get_screenshot_as_png())
+    image = get_driver_screenshot(driver)
+
     location, size = element.location, element.size
     return image.crop((
         int(location["x"]),
@@ -80,7 +95,7 @@ def get_multiple_element_screenshot(driver, elements):
 
     combined_image = Image.new("RGBA", (right - left, bottom - top))
 
-    source_image = image_from_png(driver.get_screenshot_as_png())
+    source_image = get_driver_screenshot(driver)
     for element, bounds in zip(elements, element_bounds):
         element_image = source_image.crop(bounds)
         combined_image.paste(element_image,
